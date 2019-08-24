@@ -1,11 +1,14 @@
 import sys
 import argparse
+import os
 
 argparser = argparse.ArgumentParser(description="Another Content Tracker")
 argsubparsers = argparser.add_subparsers(title="Commands", dest="command")
 argsubparsers.required = True
-argsp = argsubparsers.add_parser("init", help="Initialize a new, empty repository.")
-argsp.add_argument("path",metavar="directory", nargs="?", default=".", help="Where to create the repository.")
+argsp = argsubparsers.add_parser(
+    "init", help="Initialize a new, empty repository.")
+argsp.add_argument("path", metavar="directory", nargs="?",
+                   default=".", help="Where to create the repository.")
 
 
 def main(argv=sys.argv[1:]):
@@ -15,4 +18,20 @@ def main(argv=sys.argv[1:]):
 
 
 def cmd_init(args):
-    print("Hello from init")
+    repo_create(args.path)
+
+
+class GitRepository(object):
+    """A git repository"""
+    worktree = None
+    gitdir = None
+
+    def __init__(self, path, force=False):
+        self.worktree = path
+        self.gitdir = os.path.join(path, ".git")
+
+
+def repo_create(path):
+	"""Create a new repository at path."""
+	repo = GitRepository(path)
+	print(repo.worktree, repo.gitdir)
