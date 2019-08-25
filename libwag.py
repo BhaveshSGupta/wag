@@ -26,7 +26,7 @@ class GitRepository(object):
     worktree = None
     gitdir = None
 
-    def __init__(self, path, force=False):
+    def __init__(self, path):
         self.worktree = path
         self.gitdir = os.path.join(path, ".git")
 
@@ -45,3 +45,37 @@ def repo_create(path):
     else:
         # Create directory as nothing exist with same path
         os.makedirs(repo.worktree)
+        repo_path(repo, "branches")
+    
+    assert(repo_dir(repo, "branches", mkdir=True))
+    assert(repo_dir(repo, "objects", mkdir=True))
+    assert(repo_dir(repo, "refs", "tags", mkdir=True))
+    assert(repo_dir(repo, "refs", "heads", mkdir=True))
+    
+
+def repo_dir(repo, *path, mkdir=False):
+    # repo is for our repository object as we want to work with repository.
+    # *path is the path we want to check
+    # mkdir to specify whether we want to create directory or not.
+
+    # this function would give us path we want to check if it exist or not
+    path = repo_path(repo, *path)
+
+    # This would check whether path exists and if it does then it would check if it is a direcoty or not
+    if os.path.exists(path):
+        if (os.path.isdir(path)):
+            return path
+        else:
+            raise Exception("Not a directory %s" % path)
+
+    # This would check if we need to create directory as it doesn't exsits
+    if mkdir:
+        os.makedirs(path)
+        return path
+    else:
+        return None
+
+
+def repo_path(repo, *path):
+    # This would return us path under repository git directory
+    return os.path.join(repo.gitdir, *path)
