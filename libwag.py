@@ -1,6 +1,7 @@
 import sys
 import argparse
 import os
+import configparser
 
 argparser = argparse.ArgumentParser(description="Another Content Tracker")
 argsubparsers = argparser.add_subparsers(title="Commands", dest="command")
@@ -51,7 +52,16 @@ def repo_create(path):
     assert(repo_dir(repo, "objects", mkdir=True))
     assert(repo_dir(repo, "refs", "tags", mkdir=True))
     assert(repo_dir(repo, "refs", "heads", mkdir=True))
+
+    with open(repo_file(repo, "description"), "w") as f:
+        f.write("Unnamed repository; edit this file 'description' to name the repository.\n")
     
+    with open(repo_file(repo, "HEAD"), "w") as f:
+        f.write("ref: refs/heads/master\n")
+
+    with open(repo_file(repo, "config"), "w") as f:
+        config = repo_default_config()
+        config.write(f)
 
 def repo_dir(repo, *path, mkdir=False):
     # repo is for our repository object as we want to work with repository.
@@ -79,3 +89,18 @@ def repo_dir(repo, *path, mkdir=False):
 def repo_path(repo, *path):
     # This would return us path under repository git directory
     return os.path.join(repo.gitdir, *path)
+
+def repo_file(repo, *path, mkdir=False):
+
+    if repo_dir(repo, *path[:-1], mkdir=mkdir):
+        return repo_path(repo, *path)
+
+def repo_default_config():
+    ret = configparser.ConfigParser()
+
+    ret.add_section("core")
+    ret.set("core", "repositoryformatversion", "0")
+    ret.set("core", "filemode", "false")
+    ret.set("core", "bare", "false")
+
+    return ret
